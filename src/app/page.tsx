@@ -1,65 +1,125 @@
 "use client";
 
-import React, { useState } from "react";
-import { APIProvider, AdvancedMarker, Map } from "@vis.gl/react-google-maps";
-import { LoraNode } from "./types";
-import LoraNodeDetailsModal from "@/components/LoraNodeDetailsModal";
+import React, { useMemo, useState } from "react";
+import { APIProvider, Map } from "@vis.gl/react-google-maps";
 import FocusAllButton from "@/components/FocusAllButton";
+import { X } from "lucide-react";
+import Tabs from "@/components/Tabs";
+import NodeHeader from "@/components/NodeHeader";
+import UserBadge from "@/components/UserBadge";
+import { Node } from "./types";
+import { useNodes } from "@/hooks/useNodes";
+import LoraNodeMarker from "@/components/LoraNodeMarker";
+import InterpretData from "@/components/InterpretData";
 
-const LoraNodeMarker: React.FC<{ node: LoraNode; onClick: () => void }> = ({
-  node,
-  onClick,
-}) => {
-  return (
-    <AdvancedMarker position={node.position} onClick={onClick}>
-      <button
-        type="button"
-        className="size-12 bg-rose-500 border-2 border-rose-400 rounded-full flex items-center justify-center animate-pulse"
-      >
-        <p className="text-center text-white font-bold">{node.title}</p>
-      </button>
-    </AdvancedMarker>
-  );
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartOptions,
+} from "chart.js";
+import NodeChart from "@/components/NodeChart";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+const mapSettings = {
+  center: {
+    lat: 47.6512,
+    lng: 26.2553,
+  },
+  zoom: 14,
 };
 
 export default function Home() {
-  const mapSettings = {
-    center: {
-      lat: 47.6512,
-      lng: 26.2553,
-    },
-    zoom: 14,
-  };
+  const [loraNode, setLoraNode] = useState<Node>();
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  const [loraNodes, setLoraNodes] = useState<LoraNode[]>([
-    {
-      id: "lora-node-1",
-      title: "Lora Node 1",
-      position: {
-        lat: 47.6512,
-        lng: 26.2553,
+  const { nodes, loading } = useNodes();
+
+  const [activeTab, setActiveTab] = useState<"temperature" | "humidity">(
+    "temperature"
+  );
+
+  const [temperatureData] = useState({
+    labels: ["1h ago", "45m ago", "30m ago", "15m ago", "Now"],
+    datasets: [
+      {
+        label: "Temperature (°C)",
+        data: [20, 22, 21, 23, 25],
+        borderColor: "rgb(255, 99, 132)",
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
       },
-      data: {
-        temperature: 39.8,
-        humidity: 5,
-        CO2: 12,
+    ],
+  });
+
+  const [humidityData] = useState({
+    labels: ["1h ago", "45m ago", "30m ago", "15m ago", "Now"],
+    datasets: [
+      {
+        label: "Humidity (%)",
+        data: [45, 48, 50, 47, 52],
+        borderColor: "rgb(53, 162, 235)",
+        backgroundColor: "rgba(53, 162, 235, 0.5)",
       },
-    },
-    {
-      id: "lora-node-2",
-      title: "Lora Node 2",
-      position: {
-        lat: 47.62,
-        lng: 26.24,
+    ],
+  });
+
+  const chartOptions: ChartOptions<"line"> = useMemo(
+    () => ({
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false,
+        },
+        title: {
+          display: false,
+        },
       },
-      data: {
-        temperature: 19.8,
-        humidity: 23,
-        CO2: 12,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: false,
+          },
+        },
+        x: {
+          title: {
+            display: false,
+          },
+        },
       },
-    },
-  ]);
-  const [activeLoraNode, setActiveLoraNode] = useState<string>();
+    }),
+    [activeTab]
+  );
+
+  const handleDeleteNode = (nodeId: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this node?"
+    );
+
+    if (confirmDelete) {
+      // setLoraNodes((prevNodes) =>
+      //   prevNodes.filter((node) => node.id !== nodeId)
+      // );
+    }
+
+    setSheetOpen(false);
+    setLoraNode(undefined);
+  };
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
@@ -67,29 +127,77 @@ export default function Home() {
         apiKey="AIzaSyB - RZ6MalrT7wfW_6GB0HQjmYwIBgI71tA"
         libraries={["marker"]}
       >
-        <Map
-          mapId="lora-nodes-map"
-          className="absolute inset-0 scale-110"
-          defaultCenter={mapSettings.center}
-          defaultZoom={mapSettings.zoom}
-          gestureHandling={"greedy"}
-          disableDefaultUI={true}
-        >
-          {loraNodes.map((node) => (
-            <LoraNodeMarker
-              key={node.id}
-              node={node}
-              onClick={() => setActiveLoraNode(node.id)}
-            />
-          ))}
-        </Map>
-        <FocusAllButton nodes={loraNodes} />
-      </APIProvider>
+        <div className="absolute inset-0 flex">
+          {/* Map and floating UI components */}
+          <div className="flex-1 relative h-screen overflow-hidden">
+            <UserBadge />
+            <Map
+              mapId="lora-nodes-map"
+              className="absolute z-0 inset-0 scale-110"
+              defaultCenter={mapSettings.center}
+              defaultZoom={mapSettings.zoom}
+              gestureHandling={"greedy"}
+              disableDefaultUI={true}
+            >
+              {!loading &&
+                nodes &&
+                nodes.map((node, i) => (
+                  <LoraNodeMarker
+                    key={node.device_id}
+                    node={node}
+                    onClick={() => {
+                      setSheetOpen(true);
+                      setLoraNode(nodes[i]);
+                    }}
+                  />
+                ))}
+            </Map>
 
-      <LoraNodeDetailsModal
-        node={loraNodes.find((node) => node.id === activeLoraNode)}
-        setNode={setActiveLoraNode}
-      />
+            {!loading && nodes && <FocusAllButton nodes={nodes} />}
+          </div>
+
+          {/* Side Sheet */}
+          <div
+            className={`relative flex-shrink-0 transition-all ${
+              sheetOpen ? "w-full sm:w-[512px]" : "w-0"
+            }`}
+          >
+            {!!loraNode && (
+              <div
+                key={loraNode.id}
+                className="absolute top-0 left-0 bottom-0 w-screen sm:w-[512px] overflow-y-scroll"
+              >
+                <div className="py-8 px-4 sm:py-4 sm:px-8">
+                  <button
+                    type="button"
+                    className="size-10 bg-gray-100 rounded-full flex items-center justify-center mb-8"
+                    onClick={() => setSheetOpen(false)}
+                  >
+                    <X size={16} />
+                  </button>
+
+                  <NodeHeader node={loraNode} onDelete={handleDeleteNode} />
+
+                  {/* Graph Tabs */}
+                  <Tabs
+                    activeTab={activeTab}
+                    onTabChange={(tab) => setActiveTab(tab)}
+                  />
+
+                  <div className="mb-8">
+                    <NodeChart
+                      nodeId={loraNode.device_id}
+                      dataType={activeTab}
+                    />
+                  </div>
+
+                  {loraNode && <InterpretData node={loraNode} />}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </APIProvider>
     </div>
   );
 }

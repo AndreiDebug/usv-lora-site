@@ -3,15 +3,31 @@ export type LoraNode = {
   title: string;
   position: Position;
   data: LoraData;
+  active?: boolean;
 };
 
 export type LoraData = {
   temperature: number;
   humidity: number;
-  CO2: number;
+  battery: number;
 };
 
 export type Position = {
   lat: number;
   lng: number;
 };
+
+export interface NodeReading {
+  battery: number;
+  humidity: number;
+  latitude: number;
+  longitude: number;
+  temperature: number;
+  timestamp: Date;
+}
+
+export interface Node {
+  id: string;
+  device_id: string;
+  lastReading: NodeReading;
+}

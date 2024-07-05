@@ -1,12 +1,17 @@
-import { Node } from "@/app/types";
+import { Node } from "@/types";
 import {
   Droplet,
   ThermometerIcon,
   WifiOff,
   Activity,
   Trash2,
+  Sparkle,
 } from "lucide-react";
 import Button from "@/components/Button";
+import { getIsActive } from "@/utils";
+import { useState } from "react";
+import Modal from "./Modal";
+import { useNodeData } from "@/hooks/useNodes";
 
 interface NodeHeaderProps {
   node: Node;
@@ -14,7 +19,18 @@ interface NodeHeaderProps {
 }
 
 const NodeHeader: React.FC<NodeHeaderProps> = ({ node, onDelete }) => {
-  const active = true;
+  const active = getIsActive(node);
+  const { readings } = useNodeData(node.device_id);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <header className="mb-8">
@@ -24,16 +40,21 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({ node, onDelete }) => {
       </div>
 
       {active ? (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <DataItem
             icon={<ThermometerIcon size={20} className="text-amber-500" />}
-            label="Current Temperature"
+            label="Temperature"
             value={`${node.lastReading.temperature}°C`}
           />
           <DataItem
             icon={<Droplet size={20} className="text-sky-500" />}
-            label="Current Humidity"
+            label="Humidity"
             value={`${node.lastReading.humidity}%`}
+          />
+          <DataItem
+            icon={<Sparkle size={20} className="text-red-500" />}
+            label={"Voltage"}
+            value={`${node.lastReading.battery}V`}
           />
         </div>
       ) : (
@@ -58,6 +79,47 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({ node, onDelete }) => {
           )}
         </>
       )}
+
+      <div className="mt-8">
+        <Button
+          fullWidth
+          label="Open Modal"
+          onClick={handleOpenModal}
+          variant="light"
+          // icon={SomeIcon}
+        />
+
+        <Modal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          title={`Data for node ${node.device_id}`}
+        >
+          {readings && readings.length > 1 && (
+            <div className="mt-6">
+              <h3 className="font-semibold mb-2">Previous Readings</h3>
+              <div className="max-h-[70vh] overflow-y-auto mb-8">
+                {readings.slice(1).map((reading, index) => (
+                  <div key={index} className="border-t pt-2 mt-2">
+                    <p className="text-sm text-gray-500">
+                      {new Date(reading.timestamp).toLocaleString()}
+                    </p>
+                    <p>
+                      Temp: {reading.temperature}°C, Humidity:{" "}
+                      {reading.humidity}%, Battery: {reading.battery}V
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <Button
+            label="Close"
+            onClick={handleCloseModal}
+            variant="default"
+            fullWidth
+          />
+        </Modal>
+      </div>
     </header>
   );
 };
@@ -94,7 +156,7 @@ const DataItem: React.FC<{
     {icon}
     <div className="ml-3">
       <p className="text-xs text-gray-500">{label}</p>
-      <p className="text-lg font-semibold text-gray-800">{value}</p>
+      <p className="text-base font-semibold text-gray-800">{value}</p>
     </div>
   </div>
 );

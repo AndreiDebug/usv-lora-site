@@ -5,7 +5,7 @@ import { useState } from "react";
 import Button from "./Button";
 import { WandSparkles, Loader2, RefreshCw } from "lucide-react";
 import { useAIStore } from "@/state/useAIStore";
-import { Node } from "@/app/types";
+import { Node } from "@/types";
 
 const InterpretData: React.FC<{ node: Node }> = ({ node }) => {
   const { isLoading, error, submit } = useInterpret(node.device_id);

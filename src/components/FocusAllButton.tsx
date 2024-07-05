@@ -1,4 +1,4 @@
-import { Node } from "@/app/types";
+import { Node } from "@/types";
 import { useMap } from "@vis.gl/react-google-maps";
 import { Minimize2Icon } from "lucide-react";
 import { useCallback } from "react";

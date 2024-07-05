@@ -29,7 +29,7 @@ interface NodeChartProps {
 }
 
 const NodeChart: React.FC<NodeChartProps> = ({ nodeId, dataType }) => {
-  const { readings, loading, error } = useNodeData(nodeId);
+  const { readings, loading, error } = useNodeData(nodeId, 86400000);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -61,6 +61,11 @@ const NodeChart: React.FC<NodeChartProps> = ({ nodeId, dataType }) => {
 
   const chartOptions: ChartOptions<"line"> = {
     responsive: true,
+    elements: {
+      point: {
+        radius: 1,
+      },
+    },
     plugins: {
       legend: {
         display: false,

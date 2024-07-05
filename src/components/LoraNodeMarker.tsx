@@ -1,20 +1,13 @@
-import { Node } from "@/app/types";
+import { Node } from "@/types";
+import { getIsActive } from "@/utils";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import { useMemo } from "react";
-
-const ONE_HOUR = 60 * 60 * 1000;
 
 const LoraNodeMarker: React.FC<{ node: Node; onClick: () => void }> = ({
   node,
   onClick,
 }) => {
-  const active = useMemo(() => {
-    const now = new Date();
-    const lastReadingTime = node.lastReading.timestamp;
-    const timeDifference = now.getTime() - lastReadingTime.getTime();
-
-    return timeDifference < ONE_HOUR;
-  }, [node]);
+  const active = getIsActive(node);
 
   return (
     <AdvancedMarker

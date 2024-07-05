@@ -1,4 +1,3 @@
-import { LoraNode } from "@/app/types";
 import { z } from "zod";
 
 export const interpretDataSchema = z.object({

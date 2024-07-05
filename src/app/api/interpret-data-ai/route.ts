@@ -1,6 +1,6 @@
 import { streamObject } from "ai";
 import { interpretDataSchema } from "@/schemas";
-import { Node } from "@/app/types";
+import { Node } from "@/types";
 import openai from "@/lib/openai/openai";
 
 export const maxDuration = 30;

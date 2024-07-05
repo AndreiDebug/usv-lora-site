@@ -7,12 +7,11 @@ import { X } from "lucide-react";
 import Tabs from "@/components/Tabs";
 import NodeHeader from "@/components/NodeHeader";
 import UserBadge from "@/components/UserBadge";
-import { Node } from "./types";
+import { Node } from "../types";
 import { useNodes } from "@/hooks/useNodes";
 import LoraNodeMarker from "@/components/LoraNodeMarker";
 import InterpretData from "@/components/InterpretData";
 
-import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -52,58 +51,6 @@ export default function Home() {
 
   const [activeTab, setActiveTab] = useState<"temperature" | "humidity">(
     "temperature"
-  );
-
-  const [temperatureData] = useState({
-    labels: ["1h ago", "45m ago", "30m ago", "15m ago", "Now"],
-    datasets: [
-      {
-        label: "Temperature (°C)",
-        data: [20, 22, 21, 23, 25],
-        borderColor: "rgb(255, 99, 132)",
-        backgroundColor: "rgba(255, 99, 132, 0.5)",
-      },
-    ],
-  });
-
-  const [humidityData] = useState({
-    labels: ["1h ago", "45m ago", "30m ago", "15m ago", "Now"],
-    datasets: [
-      {
-        label: "Humidity (%)",
-        data: [45, 48, 50, 47, 52],
-        borderColor: "rgb(53, 162, 235)",
-        backgroundColor: "rgba(53, 162, 235, 0.5)",
-      },
-    ],
-  });
-
-  const chartOptions: ChartOptions<"line"> = useMemo(
-    () => ({
-      responsive: true,
-      plugins: {
-        legend: {
-          display: false,
-        },
-        title: {
-          display: false,
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: {
-            display: false,
-          },
-        },
-        x: {
-          title: {
-            display: false,
-          },
-        },
-      },
-    }),
-    [activeTab]
   );
 
   const handleDeleteNode = (nodeId: string) => {

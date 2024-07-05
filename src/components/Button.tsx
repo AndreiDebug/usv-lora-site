@@ -7,7 +7,7 @@ interface ButtonProps {
   icon?: LucideIcon;
   iconPosition?: "before" | "after";
   fullWidth?: boolean;
-  variant?: "default" | "red";
+  variant?: "default" | "red" | "light";
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,6 +23,7 @@ const Button: React.FC<ButtonProps> = ({
   const variantClasses = {
     default: "bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500",
     red: "bg-red-500 text-white hover:bg-red-600 focus:ring-red-500",
+    light: "bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-300",
   };
 
   return (

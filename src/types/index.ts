@@ -1,17 +1,3 @@
-export type LoraNode = {
-  id: string;
-  title: string;
-  position: Position;
-  data: LoraData;
-  active?: boolean;
-};
-
-export type LoraData = {
-  temperature: number;
-  humidity: number;
-  battery: number;
-};
-
 export type Position = {
   lat: number;
   lng: number;

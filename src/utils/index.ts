@@ -1,6 +1,6 @@
 import { Node } from "@/types";
 
-const ONE_HOUR = 60 * 60 * 1000;
+export const ONE_HOUR = 60 * 60 * 1000;
 
 export const getIsActive = (node: Node) => {
   const now = new Date();

@@ -5,7 +5,7 @@ import {
   WifiOff,
   Activity,
   Trash2,
-  Sparkle
+  Sparkle,
 } from "lucide-react";
 import Button from "@/components/Button";
 import { getIsActive } from "@/utils";
@@ -16,11 +16,16 @@ import { useNodeData } from "@/hooks/useNodes";
 interface NodeHeaderProps {
   node: Node;
   onDelete?: (nodeId: string) => void;
+  hoursAgo?: number;
 }
 
-const NodeHeader: React.FC<NodeHeaderProps> = ({ node, onDelete }) => {
+const NodeHeader: React.FC<NodeHeaderProps> = ({
+  node,
+  onDelete,
+  hoursAgo = 1,
+}) => {
   const active = getIsActive(node);
-  const { readings } = useNodeData(node.device_id, Date.now());
+  const { readings } = useNodeData(node.device_id, hoursAgo);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -92,7 +97,8 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({ node, onDelete }) => {
         <Modal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          title={`Data for node ${node.device_id}`}>
+          title={`Data for node ${node.device_id}`}
+        >
           {readings && readings.length > 1 && (
             <div className="mt-6">
               <h3 className="font-semibold mb-2">Previous Readings</h3>
@@ -127,7 +133,8 @@ const StatusIndicator: React.FC<{ isActive: boolean }> = ({ isActive }) => (
   <div
     className={`flex items-center ${
       isActive ? "text-green-500" : "text-gray-400"
-    }`}>
+    }`}
+  >
     {isActive ? (
       <>
         <span className="relative flex h-3 w-3 mr-2">

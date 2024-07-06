@@ -26,13 +26,22 @@ ChartJS.register(
 interface NodeChartProps {
   nodeId: string;
   dataType: "temperature" | "humidity";
+  hoursAgo?: number;
 }
 
-const NodeChart: React.FC<NodeChartProps> = ({ nodeId, dataType }) => {
-  const { readings, loading, error } = useNodeData(nodeId, 86400000);
+const NodeChart: React.FC<NodeChartProps> = ({
+  nodeId,
+  dataType,
+  hoursAgo = 1,
+}) => {
+  const { readings, loading, error } = useNodeData(nodeId, hoursAgo);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
+
+  if (readings.length === 0) {
+    return <NoDataPlaceholder dataType={dataType} />;
+  }
 
   const labels = readings.map((reading) =>
     new Date(reading.timestamp).toLocaleTimeString([], {
@@ -45,7 +54,6 @@ const NodeChart: React.FC<NodeChartProps> = ({ nodeId, dataType }) => {
     labels,
     datasets: [
       {
-        label: dataType === "temperature" ? "Temperature (°C)" : "Humidity (%)",
         data: readings.map((reading) => reading[dataType]),
         borderColor:
           dataType === "temperature"
@@ -63,7 +71,7 @@ const NodeChart: React.FC<NodeChartProps> = ({ nodeId, dataType }) => {
     responsive: true,
     elements: {
       point: {
-        radius: 1,
+        radius: 2,
       },
     },
     plugins: {
@@ -90,6 +98,33 @@ const NodeChart: React.FC<NodeChartProps> = ({ nodeId, dataType }) => {
   };
 
   return <Line options={chartOptions} data={data} />;
+};
+
+const NoDataPlaceholder: React.FC<{ dataType: "temperature" | "humidity" }> = ({
+  dataType,
+}) => {
+  return (
+    <div className="flex flex-col items-center justify-center h-64 bg-gray-100 rounded-lg">
+      <svg
+        className="w-24 h-24 text-gray-400 mb-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <p className="text-gray-600 text-lg font-medium">
+        No {dataType} data available
+      </p>
+      <p className="text-gray-500 text-sm mt-2">Check back later for updates</p>
+    </div>
+  );
 };
 
 export default NodeChart;

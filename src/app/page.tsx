@@ -8,7 +8,7 @@ import Tabs from "@/components/Tabs";
 import NodeHeader from "@/components/NodeHeader";
 import UserBadge from "@/components/UserBadge";
 import { Node } from "../types";
-import { useNodes } from "@/hooks/useNodes";
+import { deleteNodeAndReadings, useNodes } from "@/hooks/useNodes";
 import LoraNodeMarker from "@/components/LoraNodeMarker";
 import InterpretData from "@/components/InterpretData";
 
@@ -21,7 +21,6 @@ import {
   Title,
   Tooltip,
   Legend,
-  ChartOptions,
 } from "chart.js";
 import NodeChart from "@/components/NodeChart";
 
@@ -43,29 +42,56 @@ const mapSettings = {
   zoom: 14,
 };
 
+const graphTabOptions = [
+  { id: "temperature" as const, label: "Temperature" },
+  { id: "humidity" as const, label: "Humidity" },
+] as const;
+
+type GraphTabId = (typeof graphTabOptions)[number]["id"];
+
+const timeRangeOptions = [
+  { id: "1h" as const, label: "1 hour" },
+  { id: "1d" as const, label: "1 day" },
+] as const;
+
+type TimeRangeId = (typeof timeRangeOptions)[number]["id"];
+
 export default function Home() {
   const [loraNode, setLoraNode] = useState<Node>();
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const { nodes, loading } = useNodes();
+  const { nodes, loading, mutate } = useNodes();
 
-  const [activeTab, setActiveTab] = useState<"temperature" | "humidity">(
-    "temperature"
+  const [activeGraphTab, setActiveGraphTab] = useState<GraphTabId>(
+    graphTabOptions[0].id
+  );
+  const [activeTimeRangeTab, setActiveTimeRangeTab] = useState<TimeRangeId>(
+    timeRangeOptions[0].id
   );
 
-  const handleDeleteNode = (nodeId: string) => {
+  const timeRange = useMemo(() => {
+    if (activeTimeRangeTab === "1d") return 24;
+    return 1;
+  }, [activeTimeRangeTab]);
+
+  const handleDeleteNode = async (nodeId: string) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this node?"
     );
 
     if (confirmDelete) {
-      // setLoraNodes((prevNodes) =>
-      //   prevNodes.filter((node) => node.id !== nodeId)
-      // );
+      try {
+        await deleteNodeAndReadings(nodeId);
+        setSheetOpen(false);
+        mutate();
+      } catch (error) {
+        console.error("Error deleting node:", error);
+        alert("An error occurred while deleting the node. Please try again.");
+      }
+    } else {
+      setSheetOpen(false);
     }
-
     setSheetOpen(false);
-    setLoraNode(undefined);
   };
 
   return (
@@ -123,18 +149,32 @@ export default function Home() {
                     <X size={16} />
                   </button>
 
-                  <NodeHeader node={loraNode} onDelete={handleDeleteNode} />
+                  <NodeHeader
+                    hoursAgo={timeRange}
+                    node={loraNode}
+                    onDelete={handleDeleteNode}
+                  />
 
                   {/* Graph Tabs */}
                   <Tabs
-                    activeTab={activeTab}
-                    onTabChange={(tab) => setActiveTab(tab)}
+                    activeTab={activeGraphTab}
+                    onTabChange={(tab) => setActiveGraphTab(tab)}
+                    tabs={graphTabOptions}
+                  />
+
+                  {/* Time Range Tabs */}
+                  <Tabs
+                    activeTab={activeTimeRangeTab}
+                    onTabChange={(tab) => setActiveTimeRangeTab(tab)}
+                    tabs={timeRangeOptions}
+                    size="small"
                   />
 
                   <div className="mb-8">
                     <NodeChart
                       nodeId={loraNode.device_id}
-                      dataType={activeTab}
+                      dataType={activeGraphTab}
+                      hoursAgo={timeRange}
                     />
                   </div>
 

@@ -20,7 +20,7 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend,
+  Legend
 } from "chart.js";
 import NodeChart from "@/components/NodeChart";
 
@@ -37,21 +37,21 @@ ChartJS.register(
 const mapSettings = {
   center: {
     lat: 47.6512,
-    lng: 26.2553,
+    lng: 26.2553
   },
-  zoom: 14,
+  zoom: 14
 };
 
 const graphTabOptions = [
   { id: "temperature" as const, label: "Temperature" },
-  { id: "humidity" as const, label: "Humidity" },
+  { id: "humidity" as const, label: "Humidity" }
 ] as const;
 
 type GraphTabId = (typeof graphTabOptions)[number]["id"];
 
 const timeRangeOptions = [
   { id: "1h" as const, label: "1 hour" },
-  { id: "1d" as const, label: "1 day" },
+  { id: "1d" as const, label: "1 day" }
 ] as const;
 
 type TimeRangeId = (typeof timeRangeOptions)[number]["id"];
@@ -98,8 +98,7 @@ export default function Home() {
     <div className="relative w-screen h-screen overflow-hidden">
       <APIProvider
         apiKey="AIzaSyB - RZ6MalrT7wfW_6GB0HQjmYwIBgI71tA"
-        libraries={["marker"]}
-      >
+        libraries={["marker"]}>
         <div className="absolute inset-0 flex">
           {/* Map and floating UI components */}
           <div className="flex-1 relative h-screen overflow-hidden">
@@ -110,8 +109,7 @@ export default function Home() {
               defaultCenter={mapSettings.center}
               defaultZoom={mapSettings.zoom}
               gestureHandling={"greedy"}
-              disableDefaultUI={true}
-            >
+              disableDefaultUI={true}>
               {!loading &&
                 nodes &&
                 nodes.map((node, i) => (
@@ -130,7 +128,7 @@ export default function Home() {
           </div>
 
           {/* Side Sheet */}
-          <div
+          {/* <div
             className={`relative flex-shrink-0 transition-all ${
               sheetOpen ? "w-full sm:w-[512px]" : "w-0"
             }`}
@@ -155,14 +153,12 @@ export default function Home() {
                     onDelete={handleDeleteNode}
                   />
 
-                  {/* Graph Tabs */}
                   <Tabs
                     activeTab={activeGraphTab}
                     onTabChange={(tab) => setActiveGraphTab(tab)}
                     tabs={graphTabOptions}
                   />
 
-                  {/* Time Range Tabs */}
                   <Tabs
                     activeTab={activeTimeRangeTab}
                     onTabChange={(tab) => setActiveTimeRangeTab(tab)}
@@ -182,7 +178,7 @@ export default function Home() {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       </APIProvider>
     </div>

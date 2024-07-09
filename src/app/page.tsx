@@ -11,28 +11,7 @@ import { Node } from "../types";
 import { deleteNodeAndReadings, useNodes } from "@/hooks/useNodes";
 import LoraNodeMarker from "@/components/LoraNodeMarker";
 import InterpretData from "@/components/InterpretData";
-
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-} from "chart.js";
 import NodeChart from "@/components/NodeChart";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
 const mapSettings = {
   center: {
@@ -128,22 +107,19 @@ export default function Home() {
           </div>
 
           {/* Side Sheet */}
-          {/* <div
+          <div
             className={`relative flex-shrink-0 transition-all ${
               sheetOpen ? "w-full sm:w-[512px]" : "w-0"
-            }`}
-          >
+            }`}>
             {!!loraNode && (
               <div
                 key={loraNode.id}
-                className="absolute top-0 left-0 bottom-0 w-screen sm:w-[512px] overflow-y-scroll"
-              >
+                className="absolute top-0 left-0 bottom-0 w-screen sm:w-[512px] overflow-y-scroll">
                 <div className="py-8 px-4 sm:py-4 sm:px-8">
                   <button
                     type="button"
                     className="size-10 bg-gray-100 rounded-full flex items-center justify-center mb-8"
-                    onClick={() => setSheetOpen(false)}
-                  >
+                    onClick={() => setSheetOpen(false)}>
                     <X size={16} />
                   </button>
 
@@ -178,7 +154,7 @@ export default function Home() {
                 </div>
               </div>
             )}
-          </div> */}
+          </div>
         </div>
       </APIProvider>
     </div>

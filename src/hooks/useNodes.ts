@@ -7,7 +7,7 @@ import {
   limit,
   where,
   writeBatch,
-  doc,
+  doc
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { Node, NodeReading } from "@/types";
@@ -39,8 +39,8 @@ const fetchNodes = async (): Promise<Node[]> => {
           latitude: readingData.latitude,
           longitude: readingData.longitude,
           temperature: readingData.temperature,
-          timestamp: readingData.timestamp.toDate(),
-        },
+          timestamp: readingData.timestamp.toDate()
+        }
       };
     }
     return null;
@@ -63,7 +63,7 @@ const fetchNodeData = async ([nodeId, timeRange]: [string, number]): Promise<
     readingsCollection,
     where("timestamp", ">=", startTime),
     orderBy("timestamp", "desc"),
-    limit(1000) // Adjust this limit as needed
+    limit(30) // Adjust this limit as needed
   );
 
   const readingsSnapshot = await getDocs(readingsQuery);
@@ -74,7 +74,7 @@ const fetchNodeData = async ([nodeId, timeRange]: [string, number]): Promise<
       timestamp: data.timestamp.toDate(),
       temperature: data.temperature,
       humidity: data.humidity,
-      battery: data.battery,
+      battery: data.battery
     };
   }) as NodeReading[];
 
@@ -86,10 +86,10 @@ export function useNodes() {
     data: nodes,
     mutate,
     error,
-    isValidating,
+    isValidating
   } = useSWR<Node[], Error>("nodes", fetchNodes, {
     refreshInterval: 60000,
-    revalidateOnFocus: false,
+    revalidateOnFocus: false
   });
 
   return {
@@ -97,7 +97,7 @@ export function useNodes() {
     mutate,
     loading: !error && !nodes,
     error,
-    isValidating,
+    isValidating
   };
 }
 
@@ -106,17 +106,17 @@ export function useNodeData(nodeId: string, hoursAgo: number = 1) {
   const {
     data: readings,
     error,
-    isValidating,
+    isValidating
   } = useSWR<NodeReading[], Error>([nodeId, timeRange], fetchNodeData, {
     refreshInterval: 60000,
-    revalidateOnFocus: false,
+    revalidateOnFocus: false
   });
 
   return {
     readings: readings || [],
     loading: !error && !readings,
     error,
-    isValidating,
+    isValidating
   };
 }
 
